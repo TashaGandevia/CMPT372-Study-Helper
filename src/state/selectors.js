@@ -8,6 +8,7 @@ import {
   starsForAccuracy,
   roundScore,
 } from '../lib/scoring.js';
+import { reviewIds } from '../lib/reviewQueue.js';
 
 // Derives current level + progress toward the next level from lifetime XP.
 // The curve math lives in lib/leveling.js (SYS-3); this is the state-aware
@@ -53,4 +54,14 @@ export function selectRunScore(state) {
 export function selectBossFailed(state) {
   const run = state.run;
   return Boolean(run && run.isBoss && run.lives === 0);
+}
+
+// Number of items currently in the review queue (SYS-8).
+export function selectReviewQueueSize(state) {
+  return state.reviewQueue.length;
+}
+
+// Ids of queued review items — consumed by SYS-9's buildRun review bias.
+export function selectReviewIds(state) {
+  return reviewIds(state.reviewQueue);
 }
