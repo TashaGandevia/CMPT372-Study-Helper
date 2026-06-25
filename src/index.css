@@ -1,0 +1,9 @@
+/*
+ * Global stylesheet. The three @tailwind directives inject Tailwind's
+ * generated layers (reset, component classes, utility classes) at build time.
+ * Keep app-wide base styles minimal here; component styling uses Tailwind
+ * utility classes directly in JSX.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
