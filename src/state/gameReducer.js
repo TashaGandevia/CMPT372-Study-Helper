@@ -112,9 +112,13 @@ export function gameReducer(state, action) {
       const run = state.run;
       const correct = Boolean(action.correct);
 
-      const combo = correct ? run.combo + 1 : 0; // TODO(SYS-4): multiplier/caps
+      const combo = correct ? run.combo + 1 : 0;
+      // Lives (SYS-5): only boss runs have lives (3); a wrong answer in a boss
+      // run costs one. Non-boss runs have lives === null and are unaffected.
+      // Hitting 0 is the fail condition (see selectBossFailed); retryBoss
+      // restarts the run with a fresh 3 lives.
       const lives =
-        !correct && run.isBoss ? Math.max(0, run.lives - 1) : run.lives; // TODO(SYS-5)
+        !correct && run.isBoss ? Math.max(0, run.lives - 1) : run.lives;
       // Base XP × difficulty (SYS-3) × combo multiplier (SYS-4). The multiplier
       // uses the post-increment combo, so a longer streak rewards more; a wrong
       // answer earns 0 regardless (xpForAnswer returns 0).

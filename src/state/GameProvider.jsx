@@ -79,7 +79,10 @@ export default function GameProvider({ children }) {
       startZone: () => fire(EVENT.START_ZONE),
       startBoss: () => fire(EVENT.START_BOSS),
       winBoss: () => fire(EVENT.WIN_BOSS),
-      retryBoss: () => fire(EVENT.RETRY_BOSS),
+      // Boss fail → retry (SYS-5): restart the boss run with a fresh 3 lives.
+      // Flow already sits at BOSS, so restarting the run is the whole retry.
+      retryBoss: () =>
+        fire(GAME_ACTION.START_RUN, { zoneId: state.zoneId, isBoss: true }),
       finishResults: () => fire(EVENT.FINISH_RESULTS),
       replayZone: () => fire(EVENT.REPLAY_ZONE),
       startCapstone: () => fire(EVENT.START_CAPSTONE),
