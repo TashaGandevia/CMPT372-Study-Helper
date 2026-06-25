@@ -1,18 +1,12 @@
-// Flow context + hook (INF-4).
+// useFlow (SYS-1) — navigation facade over the global game context.
 //
-// Split out from FlowProvider so the provider file exports only a component
-// (keeps React Fast Refresh working). Components call useFlow() to read the
-// current flow/overlay/zone and to fire transition actions.
-import { createContext, useContext } from 'react';
+// INF-4 introduced a standalone flow provider; SYS-1 merged flow into the
+// single game reducer (GDD: one source of truth). useFlow remains as a
+// convenience alias so navigation-only components (the screens) read clearly
+// and didn't need to change when flow moved into GameProvider. The game context
+// value already includes flow/overlay/zoneId and all the flow action helpers.
+import { useGame } from './gameContext.js';
 
-export const FlowContext = createContext(null);
-
-// Returns { flow, overlay, zoneId, ...actions }. Throws if used outside the
-// provider so misuse fails loudly instead of silently no-op'ing.
 export function useFlow() {
-  const ctx = useContext(FlowContext);
-  if (ctx === null) {
-    throw new Error('useFlow must be used within a <FlowProvider>');
-  }
-  return ctx;
+  return useGame();
 }

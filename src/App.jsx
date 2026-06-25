@@ -1,13 +1,14 @@
-// App (INF-4) — the app shell: providers + the flow router.
+// App (INF-4, updated SYS-1) — the app shell: providers + the flow router.
 //
-// App wires up FlowProvider, then FlowRouter reads the current flow state and
-// renders the matching screen, with the active overlay (pause/profile) floating
-// on top. Screen and overlay changes are animated via AnimatePresence using the
-// INF-3 motion presets (and stay calm under reduced motion).
+// App wires up GameProvider (the global game state, which now also owns the
+// flow machine), then FlowRouter reads the current flow state and renders the
+// matching screen, with the active overlay (pause/profile) floating on top.
+// Screen and overlay changes are animated via AnimatePresence using the INF-3
+// motion presets (and stay calm under reduced motion).
 //
 // The screens are INF-4 stubs; M2/M3 replace each with its real implementation.
 import { AnimatePresence } from 'framer-motion';
-import FlowProvider from './state/FlowProvider.jsx';
+import GameProvider from './state/GameProvider.jsx';
 import { useFlow } from './state/flowContext.js';
 import { FLOW, OVERLAY } from './state/flowMachine.js';
 
@@ -66,8 +67,8 @@ function FlowRouter() {
 
 export default function App() {
   return (
-    <FlowProvider>
+    <GameProvider>
       <FlowRouter />
-    </FlowProvider>
+    </GameProvider>
   );
 }
