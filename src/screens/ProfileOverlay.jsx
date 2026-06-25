@@ -4,14 +4,19 @@
 // screen underneath.
 import { Button, BadgeShelf } from '../components';
 import { useFlow } from '../state/flowContext.js';
+import { selectReviewQueueSize } from '../state/selectors.js';
 import Overlay from './Overlay.jsx';
 
 export default function ProfileOverlay() {
-  const { closeProfile } = useFlow();
+  const game = useFlow();
+  const reviewSize = selectReviewQueueSize(game);
   return (
-    <Overlay title="Profile" onClose={closeProfile}>
+    <Overlay title="Profile" onClose={game.closeProfile}>
+      <p className="text-sm text-text-muted">
+        Review queue: {reviewSize} item{reviewSize === 1 ? '' : 's'}
+      </p>
       <BadgeShelf />
-      <Button onClick={closeProfile}>Close</Button>
+      <Button onClick={game.closeProfile}>Close</Button>
     </Overlay>
   );
 }

@@ -26,6 +26,7 @@ import { xpForAnswer } from '../lib/leveling.js';
 import { comboMultiplier } from '../lib/combo.js';
 import { accuracy as computeAccuracy, starsForAccuracy } from '../lib/scoring.js';
 import { evaluateBadges } from '../data/badges.js';
+import { applyAnswerToQueue } from '../lib/reviewQueue.js';
 
 // Gameplay action types (distinct from the flow EVENT names).
 export const GAME_ACTION = {
@@ -139,13 +140,12 @@ export function gameReducer(state, action) {
         xpThisRun: run.xpThisRun + xpGain,
       };
 
-      // On a miss, push the item to the review queue (deduped). SYS-8 adds the
-      // "answer correctly twice to clear it" spacing rule.
-      const reviewQueue =
-        !correct && action.challengeId &&
-        !state.reviewQueue.includes(action.challengeId)
-          ? [...state.reviewQueue, action.challengeId]
-          : state.reviewQueue;
+      // Review queue (SYS-8): a miss (re)queues the item; a correct answer to a
+      // queued item advances it toward clearing (needs 2 correct total).
+      const reviewQueue = applyAnswerToQueue(state.reviewQueue, {
+        id: action.challengeId,
+        correct,
+      });
 
       return { ...state, run: nextRun, reviewQueue };
     }

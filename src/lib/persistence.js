@@ -12,7 +12,8 @@
 const STORAGE_KEY = 'full-stack-quest:save';
 // Bump when the durable shape changes incompatibly; old saves are then ignored
 // (a migration could be added here instead of discarding).
-const SCHEMA_VERSION = 1;
+// v2 (SYS-8): reviewQueue went from string[] to [{ id, remaining }].
+const SCHEMA_VERSION = 2;
 
 // Keys of the game state that make up durable progress.
 const DURABLE_KEYS = ['player', 'zones', 'badges', 'reviewQueue', 'settings'];
