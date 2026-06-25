@@ -33,3 +33,10 @@ export function selectRunAccuracy(state) {
   if (!run || run.total === 0) return 0;
   return run.correct / run.total;
 }
+
+// True when an active boss run has run out of lives (SYS-5). Non-boss runs have
+// lives === null and so never fail this way.
+export function selectBossFailed(state) {
+  const run = state.run;
+  return Boolean(run && run.isBoss && run.lives === 0);
+}
