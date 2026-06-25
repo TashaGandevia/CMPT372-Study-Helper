@@ -2,6 +2,8 @@
 
 > A web-based, React-powered learning game that teaches full-stack web development by letting the player **ship an app through every layer of the stack**. Built as the development outline for the project: concept, user flow, systems, mini-game specs, data models, component architecture, and build roadmap.
 
+*GDD co-authored by me, Claude and coffee*
+
 ---
 
 ## 1. Overview

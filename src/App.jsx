@@ -1,110 +1,73 @@
-// Root component.
+// App (INF-4) — the app shell: providers + the flow router.
 //
-// TEMPORARY SHOWCASE (INF-2): this renders the design tokens and shared
-// primitives so the theme can be verified by eye. INF-4 replaces this body with
-// the real flow state machine (TITLE → ONBOARDING → OVERWORLD → ...) and the
-// M1 context providers.
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Button, Card, Pill, ProgressBar } from './components';
-import { slideUp, pulse } from './lib/motion';
+// App wires up FlowProvider, then FlowRouter reads the current flow state and
+// renders the matching screen, with the active overlay (pause/profile) floating
+// on top. Screen and overlay changes are animated via AnimatePresence using the
+// INF-3 motion presets (and stay calm under reduced motion).
+//
+// The screens are INF-4 stubs; M2/M3 replace each with its real implementation.
+import { AnimatePresence } from 'framer-motion';
+import FlowProvider from './state/FlowProvider.jsx';
+import { useFlow } from './state/flowContext.js';
+import { FLOW, OVERLAY } from './state/flowMachine.js';
 
-// Zone identity colors from the GDD, used only to demo the zone ramps here.
-const ZONES = [
-  { id: 'zone1', name: 'The Wire', swatch: 'bg-zone1-500' },
-  { id: 'zone2', name: 'The Frontier', swatch: 'bg-zone2-500' },
-  { id: 'zone3', name: 'The Engine Room', swatch: 'bg-zone3-500' },
-  { id: 'zone4', name: 'The Vault', swatch: 'bg-zone4-500' },
-  { id: 'zone5', name: 'The Launchpad', swatch: 'bg-zone5-500' },
-];
+import TitleScreen from './screens/TitleScreen.jsx';
+import Onboarding from './screens/Onboarding.jsx';
+import Overworld from './screens/Overworld.jsx';
+import ZoneIntro from './screens/ZoneIntro.jsx';
+import PlayingScreen from './screens/PlayingScreen.jsx';
+import BossScreen from './screens/BossScreen.jsx';
+import Results from './screens/Results.jsx';
+import Capstone from './screens/Capstone.jsx';
+import EndScreen from './screens/EndScreen.jsx';
+import PauseOverlay from './screens/PauseOverlay.jsx';
+import ProfileOverlay from './screens/ProfileOverlay.jsx';
 
-export default function App() {
-  // Local dark-mode toggle for the showcase. The real toggle lives in the
-  // settings overlay (UI-9) and will read/write game state instead.
-  const [dark, setDark] = useState(false);
+// One screen component per flow state.
+const SCREENS = {
+  [FLOW.TITLE]: TitleScreen,
+  [FLOW.ONBOARDING]: Onboarding,
+  [FLOW.OVERWORLD]: Overworld,
+  [FLOW.ZONE_INTRO]: ZoneIntro,
+  [FLOW.PLAYING]: PlayingScreen,
+  [FLOW.BOSS]: BossScreen,
+  [FLOW.RESULTS]: Results,
+  [FLOW.CAPSTONE]: Capstone,
+  [FLOW.END]: EndScreen,
+};
 
-  function toggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle('dark', next);
-  }
+// One overlay component per overlay state.
+const OVERLAYS = {
+  [OVERLAY.PAUSED]: PauseOverlay,
+  [OVERLAY.PROFILE]: ProfileOverlay,
+};
+
+function FlowRouter() {
+  const { flow, overlay } = useFlow();
+  const Screen = SCREENS[flow];
+  const ActiveOverlay = overlay ? OVERLAYS[overlay] : null;
 
   return (
-    <main className="min-h-screen p-8">
-      <div className="mx-auto flex max-w-2xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Full-Stack Quest</h1>
-          <Button variant="secondary" size="sm" onClick={toggleTheme}>
-            {dark ? 'Light mode' : 'Dark mode'}
-          </Button>
-        </header>
+    <>
+      {/* Screen layer: mode="wait" lets the outgoing screen finish exiting
+          before the next enters. Keyed by flow so each change animates. */}
+      <AnimatePresence mode="wait">
+        <Screen key={flow} />
+      </AnimatePresence>
 
-        <p className="text-text-muted">
-          Design tokens &amp; primitives (INF-2). Real flow lands in INF-4.
-        </p>
+      {/* Overlay layer: rendered above the (still-mounted) screen, so closing
+          resumes exactly where the player left off. Keyed by overlay. */}
+      <AnimatePresence>
+        {ActiveOverlay && <ActiveOverlay key={overlay} />}
+      </AnimatePresence>
+    </>
+  );
+}
 
-        {/* Buttons */}
-        <Card>
-          <h2 className="mb-3 text-lg font-semibold">Buttons</h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button variant="primary">Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="ghost">Ghost</Button>
-            <Button variant="primary" disabled>
-              Disabled
-            </Button>
-          </div>
-        </Card>
-
-        {/* Pills */}
-        <Card>
-          <h2 className="mb-3 text-lg font-semibold">Pills</h2>
-          <div className="flex flex-wrap gap-2">
-            <Pill>Neutral</Pill>
-            <Pill tone="accent">Accent</Pill>
-            <Pill className="bg-zone3-100 text-zone3-700">Zone-colored</Pill>
-          </div>
-        </Card>
-
-        {/* Progress bar */}
-        <Card>
-          <h2 className="mb-3 text-lg font-semibold">Progress</h2>
-          <ProgressBar value={62} max={100} label="Demo progress" />
-        </Card>
-
-        {/* Zone ramps */}
-        <Card>
-          <h2 className="mb-3 text-lg font-semibold">Zone colors</h2>
-          <div className="flex flex-wrap gap-3">
-            {ZONES.map((z) => (
-              <div key={z.id} className="flex items-center gap-2">
-                <span className={`h-6 w-6 rounded ${z.swatch}`} />
-                <span className="text-sm text-text-muted">{z.name}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Motion presets (INF-3). The slideUp preset animates this card in;
-            the pulse button demos feedback motion. Both are automatically
-            toned down when the user prefers reduced motion. */}
-        <motion.div {...slideUp}>
-          <Card>
-            <h2 className="mb-3 text-lg font-semibold">Motion</h2>
-            <motion.div className="inline-block" {...pulse}>
-              <Pill tone="accent">Pulsing feedback</Pill>
-            </motion.div>
-          </Card>
-        </motion.div>
-
-        {/* Mono font sample (Code Lab) */}
-        <Card>
-          <h2 className="mb-3 text-lg font-semibold">Monospace</h2>
-          <pre className="font-mono text-sm text-text-muted">
-            res.status(200).json(users);
-          </pre>
-        </Card>
-      </div>
-    </main>
+export default function App() {
+  return (
+    <FlowProvider>
+      <FlowRouter />
+    </FlowProvider>
   );
 }
